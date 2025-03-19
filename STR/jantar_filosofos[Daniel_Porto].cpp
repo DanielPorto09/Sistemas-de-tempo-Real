@@ -33,6 +33,10 @@ public:
     char getEstadoChar() const {
         return emUso ? 'O' : 'L';
     }
+
+    bool estaEmUso() const {
+        return emUso;
+    }
 };
 
 class Filosofo {
@@ -94,18 +98,95 @@ public:
     }
 };
 
+void valida_estados(const vector<Filosofo>& filosofos, const vector<Garfo>& garfos) {
+    const int NUM_FILOSOFOS = filosofos.size();
+    const int LIMITE_STARVATION = 5; // Defina um limite para starvation
+    vector<int> tentativasFalhas(NUM_FILOSOFOS, 0); // Contador de tentativas falhas
+
+    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+        cout << "Filósofo " << i << " (" << filosofos[i].getEstadoChar() << ") - Garfo " << i << ": " << garfos[i].getEstadoChar()
+             << " | Garfo " << (i + 1) % NUM_FILOSOFOS << ": " << garfos[(i + 1) % NUM_FILOSOFOS].getEstadoChar() << endl;
+    }
+
+    int garfos_ocupados = 0;
+    int filosofos_comendo = 0;
+
+    // Contar garfos ocupados e filósofos comendo
+    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+        if (garfos[i].estaEmUso()) // Garfo ocupado
+            garfos_ocupados++;
+
+        if (filosofos[i].getEstadoChar() == 'C') // Filósofo comendo
+            filosofos_comendo++;
+    }
+
+    if (filosofos_comendo > 1) {
+        cout << "⚠️ Atenção: " << filosofos_comendo << " filósofos estão comendo ao mesmo tempo!" << endl;
+    }
+
+    // Verificar se o número de garfos ocupados é igual a filósofos comendo * 2
+    if (garfos_ocupados != filosofos_comendo * 2) {
+        if (garfos_ocupados == 0 && filosofos_comendo == 0) {
+            cout << "Válido: Nenhum filósofo está comendo e nenhum garfo está ocupado!" << endl;
+        } else {
+            cout << "Inválido: O número de garfos ocupados não corresponde ao número de filósofos comendo!" << endl;
+            abort();
+        }
+    } else {
+        cout << "Válido: O número de garfos ocupados corresponde corretamente ao número de filósofos comendo!" << endl;
+    }
+
+    // Verificar se filósofos comendo têm os dois garfos
+    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+        if (filosofos[i].getEstadoChar() == 'C') {
+            int garfo_esquerda = i;
+            int garfo_direita = (i + 1) % NUM_FILOSOFOS;
+            if (!(garfos[garfo_esquerda].estaEmUso() && garfos[garfo_direita].estaEmUso())) {
+                cout << "Erro: Filósofo " << i << " está comendo sem os dois garfos corretos!" << endl;
+                abort();
+            }
+        }
+    }
+
+    // Detectar starvation
+    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+        if (filosofos[i].getEstadoChar() == 'F') {
+            tentativasFalhas[i]++;
+            cout << " 🍽️ Filósofo " << i
+                 << " tentou comer " << tentativasFalhas[i] << " vez(es) sem sucesso."
+                 << endl;
+
+            if (tentativasFalhas[i] > LIMITE_STARVATION) {
+                cerr << " ⚠️ STARVATION DETECTADO: Filósofo " << i
+                     << " está faminto há muito tempo!"
+                     << endl;
+                abort();
+            }
+        } else if (filosofos[i].getEstadoChar() == 'C') {
+            cout << " 🍗 Filósofo " << i
+                 << " está comendo depois de " << tentativasFalhas[i] << " vez(es) sem sucesso."
+                 << endl;
+        } else {
+            tentativasFalhas[i] = 0;
+        }
+    }
+}
+
 void mostrarTodosFilosofosEGarfos(const vector<Filosofo>& filosofos, const vector<Garfo>& garfos) {
     lock_guard<mutex> lock(printMutex); // Garante que apenas uma thread imprime por vez
     // Mostrar filósofos
     for (const auto& f : filosofos) {
         cout << f.getEstadoChar() << ",";
     }
-    cout << "";
+    cout << " ";
     // Mostrar garfos
     for (const auto& g : garfos) {
         cout << g.getEstadoChar() << ",";
     }
     cout << endl;
+
+    // Chamar a função de validação
+    valida_estados(filosofos, garfos);
 }
 
 void filosofoComendo(Filosofo& filosofo, vector<Garfo>& garfos, vector<Filosofo>& filosofos) {
