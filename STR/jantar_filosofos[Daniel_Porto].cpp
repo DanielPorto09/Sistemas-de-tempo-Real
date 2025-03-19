@@ -185,7 +185,7 @@ void mostrarTodosFilosofosEGarfos(const vector<Filosofo>& filosofos, const vecto
     }
     cout << endl;
 
-    // Chamar a função de validação
+    // add função valida_estados aqui abaixo se necessario
     //valida_estados(filosofos, garfos);
 }
 
