@@ -11,7 +11,7 @@ mutex printMutex;
 class Garfo {
 private:
     bool emUso;
-    mutex mtx; // Mutex para proteger o acesso ao garfo
+    mutex mtx; 
 
 public:
     Garfo() : emUso(false) {}
@@ -57,9 +57,9 @@ public:
 
     char getEstadoChar() const {
         switch (status) {
-            case 1: return 'C'; // Comendo
-            case 2: return 'P'; // Pensando
-            case 3: return 'F'; // Com fome
+            case 1: return 'C'; 
+            case 2: return 'P'; 
+            case 3: return 'F'; 
             default: return '?';
         }
     }
@@ -72,7 +72,7 @@ public:
         bool pegouDireito = garfos[garfoDireita].pegar();
 
         if (pegouEsquerdo && pegouDireito) {
-            setStatus(1); // Começando a comer
+            setStatus(1); 
             return true;
         } else {
             if (pegouEsquerdo) {
@@ -90,7 +90,7 @@ public:
         int garfoDireita = (id + 1) % 5;
         garfos[garfoEsquerda].soltar();
         garfos[garfoDireita].soltar();
-        setStatus(2); // Voltando a pensar
+        setStatus(2); 
     }
 
     int getId() const {
@@ -100,8 +100,8 @@ public:
 
 void valida_estados(const vector<Filosofo>& filosofos, const vector<Garfo>& garfos) {
     const int NUM_FILOSOFOS = filosofos.size();
-    const int LIMITE_STARVATION = 5; // Defina um limite para starvation
-    vector<int> tentativasFalhas(NUM_FILOSOFOS, 0); // Contador de tentativas falhas
+    const int LIMITE_STARVATION = 5; 
+    vector<int> tentativasFalhas(NUM_FILOSOFOS, 0); 
 
     for (int i = 0; i < NUM_FILOSOFOS; i++) {
         cout << "Filósofo " << i << " (" << filosofos[i].getEstadoChar() << ") - Garfo " << i << ": " << garfos[i].getEstadoChar()
@@ -111,12 +111,11 @@ void valida_estados(const vector<Filosofo>& filosofos, const vector<Garfo>& garf
     int garfos_ocupados = 0;
     int filosofos_comendo = 0;
 
-    // Contar garfos ocupados e filósofos comendo
     for (int i = 0; i < NUM_FILOSOFOS; i++) {
-        if (garfos[i].estaEmUso()) // Garfo ocupado
+        if (garfos[i].estaEmUso()) 
             garfos_ocupados++;
 
-        if (filosofos[i].getEstadoChar() == 'C') // Filósofo comendo
+        if (filosofos[i].getEstadoChar() == 'C') 
             filosofos_comendo++;
     }
 
@@ -173,45 +172,43 @@ void valida_estados(const vector<Filosofo>& filosofos, const vector<Garfo>& garf
 }
 
 void mostrarTodosFilosofosEGarfos(const vector<Filosofo>& filosofos, const vector<Garfo>& garfos) {
-    lock_guard<mutex> lock(printMutex); // Garante que apenas uma thread imprime por vez
-    // Mostrar filósofos
+    lock_guard<mutex> lock(printMutex); 
     for (const auto& f : filosofos) {
         cout << f.getEstadoChar() << ",";
     }
     cout << " ";
-    // Mostrar garfos
     for (const auto& g : garfos) {
         cout << g.getEstadoChar() << ",";
     }
     cout << endl;
 
-    // add função valida_estados aqui abaixo se necessario
     //valida_estados(filosofos, garfos);
 }
 
 void filosofoComendo(Filosofo& filosofo, vector<Garfo>& garfos, vector<Filosofo>& filosofos) {
-    filosofo.setStatus(2); // Pensando
-    mostrarTodosFilosofosEGarfos(filosofos, garfos); // Exibe o estado atual
+    filosofo.setStatus(2); 
+    mostrarTodosFilosofosEGarfos(filosofos, garfos); 
     while (true) {
-        this_thread::sleep_for(chrono::milliseconds(1000)); // Pensando
-        filosofo.setStatus(3); // Com fome
-        mostrarTodosFilosofosEGarfos(filosofos, garfos); // Exibe o estado atual
+        this_thread::sleep_for(chrono::milliseconds(1000)); 
+        filosofo.setStatus(3); 
+        mostrarTodosFilosofosEGarfos(filosofos, garfos); 
 
         bool pegouGarfos = false;
         while (!pegouGarfos) {
-            pegouGarfos = filosofo.pegarGarfos(garfos); // Tenta pegar os garfos
+            pegouGarfos = filosofo.pegarGarfos(garfos); 
             if (!pegouGarfos) {
-                this_thread::sleep_for(chrono::milliseconds(500)); // Espera um pouco antes de tentar de novo
-                mostrarTodosFilosofosEGarfos(filosofos, garfos); // Exibe o estado atual
+                this_thread::sleep_for(chrono::milliseconds(500)); 
+                mostrarTodosFilosofosEGarfos(filosofos, garfos); 
             }
         }
 
-        filosofo.setStatus(1); // Comendo
-        mostrarTodosFilosofosEGarfos(filosofos, garfos); // Exibe o estado atual
-        this_thread::sleep_for(chrono::milliseconds(2000)); // Comendo
-        filosofo.soltarGarfos(garfos); // Solta os garfos
-        filosofo.setStatus(2); // Pensando
-        mostrarTodosFilosofosEGarfos(filosofos, garfos); // Exibe o estado atual
+        filosofo.setStatus(1); 
+        mostrarTodosFilosofosEGarfos(filosofos, garfos); 
+        this_thread::sleep_for(chrono::milliseconds(2000)); 
+        filosofo.soltarGarfos(garfos); 
+        mostrarTodosFilosofosEGarfos(filosofos, garfos); 
+        filosofo.setStatus(2); 
+        mostrarTodosFilosofosEGarfos(filosofos, garfos); 
     }
 }
 
