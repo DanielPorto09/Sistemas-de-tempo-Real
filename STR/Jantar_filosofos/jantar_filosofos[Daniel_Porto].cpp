@@ -65,8 +65,8 @@ public:
     }
 
     bool pegarGarfos(vector<Garfo>& garfos) {
-        int garfoEsquerda = id;
-        int garfoDireita = (id + 1) % 5;
+        int garfoEsquerda = (id - 1 + 5) % 5;
+        int garfoDireita = id;
 
         bool pegouEsquerdo = garfos[garfoEsquerda].pegar();
         bool pegouDireito = garfos[garfoDireita].pegar();
@@ -86,8 +86,8 @@ public:
     }
 
     void soltarGarfos(vector<Garfo>& garfos) {
-        int garfoEsquerda = id;
-        int garfoDireita = (id + 1) % 5;
+        int garfoEsquerda = (id - 1 + 5) % 5;
+        int garfoDireita = id;
         garfos[garfoEsquerda].soltar();
         garfos[garfoDireita].soltar();
         setStatus(2); 
@@ -105,7 +105,7 @@ void valida_estados(const vector<Filosofo>& filosofos, const vector<Garfo>& garf
 
     for (int i = 0; i < NUM_FILOSOFOS; i++) {
         cout << "Filósofo " << i << " (" << filosofos[i].getEstadoChar() << ") - Garfo " << i << ": " << garfos[i].getEstadoChar()
-             << " | Garfo " << (i + 1) % NUM_FILOSOFOS << ": " << garfos[(i + 1) % NUM_FILOSOFOS].getEstadoChar() << endl;
+             << " | Garfo " << (i -1 + NUM_FILOSOFOS) % NUM_FILOSOFOS << ": " << garfos[(i -1 + NUM_FILOSOFOS) % NUM_FILOSOFOS].getEstadoChar() << endl;
     }
 
     int garfos_ocupados = 0;
@@ -138,8 +138,8 @@ void valida_estados(const vector<Filosofo>& filosofos, const vector<Garfo>& garf
     // Verificar se filósofos comendo têm os dois garfos
     for (int i = 0; i < NUM_FILOSOFOS; i++) {
         if (filosofos[i].getEstadoChar() == 'C') {
-            int garfo_esquerda = i;
-            int garfo_direita = (i + 1) % NUM_FILOSOFOS;
+            int garfo_esquerda = (i -1 +NUM_FILOSOFOS) % NUM_FILOSOFOS;
+            int garfo_direita = i;
             if (!(garfos[garfo_esquerda].estaEmUso() && garfos[garfo_direita].estaEmUso())) {
                 cout << "Erro: Filósofo " << i << " está comendo sem os dois garfos corretos!" << endl;
                 abort();
